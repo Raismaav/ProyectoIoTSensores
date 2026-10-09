@@ -5,7 +5,7 @@
 #include <HTTPClient.h>
 #include <LiquidCrystal_I2C.h>
 
-#define DHTTYPE DHT11
+#define DHTTYPE DHT22
 
 const int lcdColumns = 16;
 const int lcdRows = 2;
@@ -102,7 +102,7 @@ void setup() {
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     Serial.println("");
-
+    int intento = 0;
     // Wait for connection
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
@@ -111,24 +111,29 @@ void setup() {
         lcd.print("Buscando red:");
         lcd.setCursor(0, 1);
         lcd.println(ssid);
+        if (intento >= 20)
+            break;
+        intento++;
     }
-    lcd.clear();
-    Serial.println("");
-    Serial.print("Conectado a ");
-    Serial.println(ssid);
-    Serial.print("Direccion IP: ");
-    Serial.println(WiFi.localIP());
-    lcd.setCursor(0, 0);
-    lcd.print("Direccion IP:");
-    lcd.setCursor(0, 1);
-    lcd.println(WiFi.localIP());
+    if (WiFi.status() == WL_CONNECTED) {
+        lcd.clear();
+        Serial.println("");
+        Serial.print("Conectado a ");
+        Serial.println(ssid);
+        Serial.print("Direccion IP: ");
+        Serial.println(WiFi.localIP());
+        lcd.setCursor(0, 0);
+        lcd.print("Direccion IP:");
+        lcd.setCursor(0, 1);
+        lcd.println(WiFi.localIP());
 
-    server.on("/", handle_OnConnect); // 1
-    server.onNotFound(handle_NotFound); // 3
+        server.on("/", handle_OnConnect); // 1
+        server.onNotFound(handle_NotFound); // 3
 
-    server.begin();
-    Serial.println("Servidor HTTP iniciado");
-    delay(5000);
+        server.begin();
+        Serial.println("Servidor HTTP iniciado");
+        delay(5000);
+    }
 }
 
 void loop() {
